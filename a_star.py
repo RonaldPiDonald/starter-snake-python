@@ -1,6 +1,6 @@
 import heapq
 
-def a_star_search(start, goal, board, snakes):
+def a_star_search(start, goal, board, snakes, my_snake_id):
     def get_neighbors(node):
         neighbors = []
         directions = {'up': (0, 1), 'down': (0, -1), 'left': (-1, 0), 'right': (1, 0)}
@@ -15,8 +15,14 @@ def a_star_search(start, goal, board, snakes):
 
     def cost(node):
         for snake in snakes:
-            if node in [(part['x'], part['y']) for part in snake['body']]:
-                return float('inf')
+            snake_body = [(part['x'], part['y']) for part in snake['body']]
+            # Überprüfung hinzugefügt, um den Schwanz der eigenen Schlange zu ignorieren
+            if snake['id'] == my_snake_id:
+                if node in snake_body[:-1]:  # Alle Teile außer dem Schwanz
+                    return float('inf')
+            else:
+                if node in snake_body:
+                    return float('inf')
         return 1
 
     open_set = []

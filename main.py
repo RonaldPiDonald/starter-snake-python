@@ -1,7 +1,7 @@
 import random
 import typing
 import a_star
-#import paranoid_minimax
+import minimax
 
 
 def info() -> typing.Dict:
@@ -40,6 +40,7 @@ def move(game_state: typing.Dict) -> typing.Dict:
     my_body = game_state['you']['body']
     opponents = [snake for snake in game_state['board']['snakes'] if snake['id'] != my_id]
     largest_opponent = max(opponents, key=lambda snake: snake['length'], default = None)
+    my_tail = game_state["you"]["body"][-1]
     
     if my_neck["x"] < my_head["x"]:
         is_move_safe["left"] = False
@@ -89,45 +90,66 @@ def move(game_state: typing.Dict) -> typing.Dict:
                     is_move_safe["left"] = False
                 if body_part["x"] == my_head["x"] + 1:
                     is_move_safe["right"] = False
-
+    
     safe_moves = []
     for move, isSafe in is_move_safe.items():
         if isSafe:
             safe_moves.append(move)
+    my_path_tail = a_star.a_star_search((my_head['x'], my_head['y']), (my_tail['x'], my_tail['y']), game_state['board'], game_state['board']['snakes'], my_id)
+
 
     if len(safe_moves) == 0:
-        print(f"MOVE {game_state['turn']}: No safe moves detected! Moving down")
-        return {"move": "down"}
-    next_move = random.choice(safe_moves)
+        print(f"MOVE {game_state['turn']}: No safe moves detected! Moving to tail")
+        next_move = my_path_tail[0]
+        
     food = game_state['board']['food']
-  
+    
     
     if food:
         sorted_foods = sorted(food, key=lambda f: abs(f['x'] - my_head['x']) + abs(f['y'] - my_head['y']))
-
+        
+        
         for food_item in sorted_foods:
-            my_path = a_star.a_star_search((my_head['x'], my_head['y']), (food_item['x'], food_item['y']), game_state['board'], game_state['board']['snakes'])
+            
+            my_path = a_star.a_star_search((my_head['x'], my_head['y']), (food_item['x'], food_item['y']), game_state['board'], game_state['board']['snakes'], my_id)
             if not my_path:
                 continue
 
             closest_food = True
+            
             for opponent in opponents:
-                opponent_path = a_star.a_star_search((opponent["head"]["x"], opponent["head"]["y"]), (food_item['x'], food_item['y']), game_state['board'], game_state['board']['snakes'])
+                opponent_path = a_star.a_star_search((opponent["head"]["x"], opponent["head"]["y"]), (food_item['x'], food_item['y']), game_state['board'], game_state['board']['snakes'], my_id)
                 if not opponent_path:
                     continue
                 if len(opponent_path) < len(my_path) or (len(opponent_path) == len(my_path) and my_size <= opponent["length"]):
                     closest_food = False
-                    break
-
+                    break   
+               
             if closest_food:
                 print("path")
                 next_move = my_path[0]
                 break
+                
+            if largest_opponent['length'] < my_size:
+                print("path size")
+                next_move = my_path[0]
+                break
+        else:
+            if my_path_tail:
+                print("tail")
+                next_move = my_path_tail[0]
+            else: 
+                print("random")
+                next_move = random.choice(safe_moves)
+    else:
+        print(my_path_tail)
+        if my_path_tail:
+            print("tail")
+            next_move = my_path_tail[0]
         else:
             print("random")
             next_move = random.choice(safe_moves)
-    else:
-        next_move = random.choice(safe_moves)
+        
 
     print(f"MOVE {game_state['turn']}: {next_move}")
     return {"move": next_move}
