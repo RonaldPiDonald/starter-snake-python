@@ -3,6 +3,8 @@ import typing
 import a_star
 import minimax
 
+from keep_alive import keep_alive
+keep_alive()
 
 def info() -> typing.Dict:
     print("INFO")
