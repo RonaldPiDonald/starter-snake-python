@@ -50,6 +50,8 @@ def run_server(handlers: typing.Dict):
     print(f"\nRunning Battlesnake at http://{host}:{port}")
     app.run(host=host, port=port)
 
+
+    
 def info() -> typing.Dict:
     print("INFO")
     return {
@@ -236,7 +238,7 @@ def move(game_state: typing.Dict) -> typing.Dict:
 
 
 if __name__ == "__main__":
-    from server import run_server
+    #from server import run_server
 
     run_server({
         "info": info,
