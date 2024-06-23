@@ -1,3 +1,4 @@
+"""
 import logging
 import os
 import typing
@@ -44,3 +45,4 @@ def run_server(handlers: typing.Dict):
 
     print(f"\nRunning Battlesnake at http://{host}:{port}")
     app.run(host=host, port=port)
+"""
