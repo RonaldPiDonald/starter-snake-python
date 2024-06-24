@@ -10,10 +10,9 @@ import typing
 from flask import Flask
 from flask import request
 
+app = Flask("Battlesnake")
 
 def run_server(handlers: typing.Dict):
-    app = Flask("Battlesnake")
-
     @app.get("/")
     def on_info():
         return handlers["info"]()
