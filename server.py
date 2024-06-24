@@ -1,48 +1,34 @@
-"""
-import logging
 import os
+import random
 import typing
+from flask import Flask, request
 
-from flask import Flask
-from flask import request
+app = Flask(__name__)
 
+@app.route("/", methods=["GET"])
+def on_info():
+    return info()
 
-def run_server(handlers: typing.Dict):
-    app = Flask("Battlesnake")
+@app.route("/start", methods=["POST"])
+def on_start():
+    game_state = request.get_json()
+    my_head(game_state)
+    return "ok"
 
-    @app.get("/")
-    def on_info():
-        return handlers["info"]()
+@app.route("/move", methods=["POST"])
+def on_move():
+    game_state = request.get_json()
+    return move(game_state)
 
-    @app.post("/start")
-    def on_start():
-        game_state = request.get_json()
-        handlers["start"](game_state)
-        return "ok"
+@app.route("/end", methods=["POST"])
+def on_end():
+    game_state = request.get_json()
+    end(game_state)
+    return "ok"
 
-    @app.post("/move")
-    def on_move():
-        game_state = request.get_json()
-        return handlers["move"](game_state)
-
-    @app.post("/end")
-    def on_end():
-        game_state = request.get_json()
-        handlers["end"](game_state)
-        return "ok"
-
-    @app.after_request
-    def identify_server(response):
-        response.headers.set(
-            "server", "battlesnake/replit/starter-snake-python"
-        )
-        return response
-
-    host = "0.0.0.0"
-    port = int(os.environ.get("PORT", "8000"))
-
-    logging.getLogger("werkzeug").setLevel(logging.ERROR)
-
-    print(f"\nRunning Battlesnake at http://{host}:{port}")
-    app.run(host=host, port=port)
-"""
+@app.after_request
+def identify_server(response):
+    response.headers.set(
+        "server", "battlesnake/replit/starter-snake-python"
+    )
+    return response
