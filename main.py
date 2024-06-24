@@ -1,54 +1,37 @@
+import os
 import random
 import typing
-import a_star
-import minimax
+from flask import Flask, request
 
-import logging
-import os
-import typing
+app = Flask(__name__)
 
-from flask import Flask
-from flask import request
+@app.get("/")
+def on_info():
+    return info()
 
-app = Flask("Battlesnake")
+@app.post("/start")
+def on_start():
+    game_state = request.get_json()
+    my_head(game_state)
+    return "ok"
 
-def run_server(handlers: typing.Dict):
-    @app.get("/")
-    def on_info():
-        return handlers["info"]()
+@app.post("/move")
+def on_move():
+    game_state = request.get_json()
+    return move(game_state)
 
-    @app.post("/start")
-    def on_start():
-        game_state = request.get_json()
-        handlers["start"](game_state)
-        return "ok"
+@app.post("/end")
+def on_end():
+    game_state = request.get_json()
+    end(game_state)
+    return "ok"
 
-    @app.post("/move")
-    def on_move():
-        game_state = request.get_json()
-        return handlers["move"](game_state)
-
-    @app.post("/end")
-    def on_end():
-        game_state = request.get_json()
-        handlers["end"](game_state)
-        return "ok"
-
-    @app.after_request
-    def identify_server(response):
-        response.headers.set(
-            "server", "battlesnake/replit/starter-snake-python"
-        )
-        return response
-
-    host = "0.0.0.0"
-    port = int(os.environ.get("PORT", "8000"))
-
-    logging.getLogger("werkzeug").setLevel(logging.ERROR)
-
-    print(f"\nRunning Battlesnake at http://{host}:{port}")
-    app.run(host=host, port=port)
-
+@app.after_request
+def identify_server(response):
+    response.headers.set(
+        "server", "battlesnake/replit/starter-snake-python"
+    )
+    return response
 
 def info() -> typing.Dict:
     print("INFO")
@@ -58,17 +41,13 @@ def info() -> typing.Dict:
         "color": "#D3D3D3",
         "head": "nr-rocket",
         "tail": "bonhomme",
-
     }
-
 
 def my_head(game_state: typing.Dict):
     print("GAME my_head")
 
-
 def end(game_state: typing.Dict):
     print("GAME OVER\n")
-
 
 def move(game_state: typing.Dict) -> typing.Dict:
     is_move_safe = {
@@ -84,10 +63,8 @@ def move(game_state: typing.Dict) -> typing.Dict:
     board_width = game_state['board']['width']
     board_height = game_state['board']['height']
     my_body = game_state['you']['body']
-    opponents = [snake for snake in game_state['board']
-                 ['snakes'] if snake['id'] != my_id]
-    largest_opponent = max(
-        opponents, key=lambda snake: snake['length'], default=None)
+    opponents = [snake for snake in game_state['board']['snakes'] if snake['id'] != my_id]
+    largest_opponent = max(opponents, key=lambda snake: snake['length'], default=None)
     my_tail = game_state["you"]["body"][-1]
 
     if my_neck["x"] < my_head["x"]:
@@ -139,11 +116,5 @@ def move(game_state: typing.Dict) -> typing.Dict:
     print(f"MOVE {game_state['turn']}: {next_move}")
     return {"move": next_move}
 
-
 if __name__ == "__main__":
-    run_server({
-        "info": info,
-        "start": my_head,
-        "move": move,
-        "end": end
-    })
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8000)))
