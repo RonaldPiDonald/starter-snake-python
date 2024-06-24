@@ -10,7 +10,7 @@ import typing
 from flask import Flask
 from flask import request
 
-app = Flask(__name__)
+
 def run_server(handlers: typing.Dict):
     app = Flask("Battlesnake")
 
@@ -239,7 +239,7 @@ def move(game_state: typing.Dict) -> typing.Dict:
 
 if __name__ == "__main__":
     #from server import run_server
-    app.run(port=5000)
+
     run_server({
         "info": info,
         "my_head": my_head,
