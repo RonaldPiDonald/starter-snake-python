@@ -5,22 +5,22 @@ from flask import Flask, request
 
 app = Flask(__name__)
 
-@app.get("/")
+@app.route("/", methods=["GET"])
 def on_info():
     return info()
 
-@app.post("/start")
+@app.route("/start", methods=["POST"])
 def on_start():
     game_state = request.get_json()
     my_head(game_state)
     return "ok"
 
-@app.post("/move")
+@app.route("/move", methods=["POST"])
 def on_move():
     game_state = request.get_json()
     return move(game_state)
 
-@app.post("/end")
+@app.route("/end", methods=["POST"])
 def on_end():
     game_state = request.get_json()
     end(game_state)
