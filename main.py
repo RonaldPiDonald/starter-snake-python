@@ -126,27 +126,29 @@ def move(game_state: typing.Dict) -> typing.Dict:
     
     
     food = game_state['board']['food']
-    
-    obstacles = set()
-    for part in my_body:
-        obstacles.add((part["x"], part["y"]))
-    for opponent in opponents:
-        for part in opponent["body"]:
+    def calc_board():
+        obstacles = set()
+        for part in my_body:
             obstacles.add((part["x"], part["y"]))
-    # Check each possible move using flood fill
-    move_options = {}
-    for move in safe_moves:
-        if move == "up":
-            new_head = (my_head["x"], my_head["y"] - 1)
-        elif move == "down":
-            new_head = (my_head["x"], my_head["y"] + 1)
-        elif move == "left":
-            new_head = (my_head["x"] - 1, my_head["y"])
-        elif move == "right":
-            new_head = (my_head["x"] + 1, my_head["y"])
+        for opponent in opponents:
+            for part in opponent["body"]:
+                obstacles.add((part["x"], part["y"]))
+        # Check each possible move using flood fill
+        move_options = {}
+        for move in safe_moves:
+            if move == "up":
+                new_head = (my_head["x"], my_head["y"] - 1)
+            elif move == "down":
+                new_head = (my_head["x"], my_head["y"] + 1)
+            elif move == "left":
+                new_head = (my_head["x"] - 1, my_head["y"])
+            elif move == "right":
+                new_head = (my_head["x"] + 1, my_head["y"])
+
+            accessible_area = flood_fill(game_state['board'], new_head[0], new_head[1], board_width, board_height, obstacles)
+            move_options[move] = accessible_area
     
-        accessible_area = flood_fill(game_state['board'], new_head[0], new_head[1], board_width, board_height, obstacles)
-        move_options[move] = accessible_area
+    
     
     next_move = None
     if food:
@@ -204,6 +206,7 @@ def move(game_state: typing.Dict) -> typing.Dict:
                                 next_move = my_path[0]
                                 break
                             else:
+                                calc_board()
                                 print("flood fill")
                                 next_move = max(move_options, key=move_options.get)
     
@@ -216,15 +219,17 @@ def move(game_state: typing.Dict) -> typing.Dict:
                 next_move = my_path_tail[0]
     
             else:
+                calc_board()
                 print("flood fill")
                 next_move = max(move_options, key=move_options.get)
     
     else:
-        # Choose the move that leads to the largest accessible area
+        calc_board()
         print("flood fill")
         next_move = max(move_options, key=move_options.get)
     
     if next_move == None:
+        calc_board()
         print("flood fill")
         next_move = max(move_options, key=move_options.get)
     print(f"MOVE {game_state['turn']}: {next_move}")

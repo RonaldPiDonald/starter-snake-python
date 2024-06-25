@@ -13,3 +13,4 @@ def flood_fill(board, x, y, width, height, obstacles):
               queue.append((nx, ny))
 
   return count
+
